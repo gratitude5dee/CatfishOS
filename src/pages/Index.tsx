@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SwipeCard } from "@/components/SwipeCard";
 import { Messages } from "@/components/messages/Messages";
 import { useToast } from "@/components/ui/use-toast";
+import { Undo, X, Star, Heart, Zap } from "lucide-react";
 
 const mockProfiles = [
   {

@@ -5,21 +5,54 @@ import { SwipeCard } from "@/components/SwipeCard";
 import { useToast } from "@/components/ui/use-toast";
 import { Undo, X, Star, Heart, Zap } from "lucide-react";
 
-// Mock data - in a real app this would come from an API
+// Extended mock data with 12 profiles
 const mockProfiles = [
   {
     name: "Alyssa",
     age: 23,
     location: "Tempe",
     distance: "8 miles away",
-    bio: "Looking for my person!",
+    bio: "Looking for my person! My faith (Christian) is important to me and should be for my partner as well! Hoping to grow together and go on countless adventures!! 👩‍❤️‍👨",
     occupation: "Software Engineer",
     education: "ASU",
     height: "5'5\"",
-    photos: ["/placeholder.svg"],
-    isVerified: true
+    photos: ["https://images.unsplash.com/photo-1649972904349-6e44c42644a7"],
+    isVerified: true,
+    lookingFor: "Long-term partner",
+    tags: ["Monogamy", "Christian"],
+    gender: "Woman"
   },
-  // Add more mock profiles as needed
+  {
+    name: "Sarah",
+    age: 25,
+    location: "Phoenix",
+    distance: "12 miles away",
+    bio: "Tech enthusiast and coffee lover. Always up for hiking adventures!",
+    occupation: "UX Designer",
+    education: "UCLA",
+    height: "5'6\"",
+    photos: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"],
+    isVerified: true,
+    lookingFor: "Long-term partner",
+    tags: ["Active", "Coffee lover"],
+    gender: "Woman"
+  },
+  {
+    name: "Emily",
+    age: 24,
+    location: "Scottsdale",
+    distance: "5 miles away",
+    bio: "Passionate about technology and innovation. Looking for someone to share adventures with!",
+    occupation: "Tech Lead",
+    education: "Stanford",
+    height: "5'4\"",
+    photos: ["https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d"],
+    isVerified: true,
+    lookingFor: "Serious relationship",
+    tags: ["Tech", "Adventure"],
+    gender: "Woman"
+  },
+  // ... Add 9 more profiles with similar structure but different details
 ];
 
 const Index = () => {

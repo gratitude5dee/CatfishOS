@@ -9,7 +9,135 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      chats: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id_1: string | null
+          profile_id_2: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id_1?: string | null
+          profile_id_2?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id_1?: string | null
+          profile_id_2?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_profile_id_1_fkey"
+            columns: ["profile_id_1"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_profile_id_2_fkey"
+            columns: ["profile_id_2"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          chat_id: string | null
+          content: string
+          created_at: string
+          id: string
+          sender_id: string | null
+        }
+        Insert: {
+          chat_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          sender_id?: string | null
+        }
+        Update: {
+          chat_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          age: number
+          bio: string | null
+          created_at: string
+          distance: string
+          education: string | null
+          gender: string | null
+          height: string | null
+          id: string
+          is_verified: boolean | null
+          location: string
+          looking_for: string | null
+          name: string
+          occupation: string | null
+          photos: string[] | null
+          tags: string[] | null
+        }
+        Insert: {
+          age: number
+          bio?: string | null
+          created_at?: string
+          distance: string
+          education?: string | null
+          gender?: string | null
+          height?: string | null
+          id?: string
+          is_verified?: boolean | null
+          location: string
+          looking_for?: string | null
+          name: string
+          occupation?: string | null
+          photos?: string[] | null
+          tags?: string[] | null
+        }
+        Update: {
+          age?: number
+          bio?: string | null
+          created_at?: string
+          distance?: string
+          education?: string | null
+          gender?: string | null
+          height?: string | null
+          id?: string
+          is_verified?: boolean | null
+          location?: string
+          looking_for?: string | null
+          name?: string
+          occupation?: string | null
+          photos?: string[] | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

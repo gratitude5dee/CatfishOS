@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { motion, PanInfo, useAnimation, AnimatePresence } from "framer-motion";
-import { Home, Camera, Ruler, Building, GraduationCap, User, X, Heart, ChevronDown } from "lucide-react";
-import { Badge } from "./ui/badge";
-import { Card } from "./ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
+import { motion, PanInfo, useAnimation } from "framer-motion";
+import { ProfileInfo } from "./profile/ProfileInfo";
+import { ProfileDetail } from "./profile/ProfileDetail";
 
 interface Profile {
   name: string;
@@ -24,9 +22,10 @@ interface Profile {
 interface SwipeCardProps {
   profile: Profile;
   onSwipe: (direction: "left" | "right" | "up") => void;
+  isMatch?: boolean;
 }
 
-export const SwipeCard = ({ profile, onSwipe }: SwipeCardProps) => {
+export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -54,8 +53,8 @@ export const SwipeCard = ({ profile, onSwipe }: SwipeCardProps) => {
       overlayControls.start({ opacity: 0, scale: 0.5 });
     }
 
-    // Show detail view on upward swipe
-    if (yOffset < -50) {
+    // Show detail view on upward swipe only if not matched
+    if (yOffset < -50 && !isMatch) {
       setShowDetail(true);
     }
   };
@@ -73,7 +72,7 @@ export const SwipeCard = ({ profile, onSwipe }: SwipeCardProps) => {
         transition: { duration: 0.2 }
       });
       onSwipe(direction);
-    } else if (yOffset < -100 || velocity.y < -500) {
+    } else if (!isMatch && (yOffset < -100 || velocity.y < -500)) {
       setShowDetail(true);
       onSwipe("up");
     } else {
@@ -132,118 +131,17 @@ export const SwipeCard = ({ profile, onSwipe }: SwipeCardProps) => {
             </div>
           </motion.div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <h2 className="text-3xl font-bold">{profile.name}</h2>
-              <span className="text-2xl">{profile.age}</span>
-              {profile.isVerified && (
-                <Badge variant="secondary" className="bg-blue-500">
-                  <Camera className="w-4 h-4 mr-1" />
-                  Verified
-                </Badge>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Home className="w-4 h-4" />
-                <span>Lives in {profile.location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Building className="w-4 h-4" />
-                <span>{profile.occupation}</span>
-              </div>
-              {profile.education && (
-                <div className="flex items-center gap-2 text-sm">
-                  <GraduationCap className="w-4 h-4" />
-                  <span>{profile.education}</span>
-                </div>
-              )}
-              {profile.height && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Ruler className="w-4 h-4" />
-                  <span>{profile.height}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-sm">
-                <User className="w-4 h-4" />
-                <span>{profile.distance}</span>
-              </div>
-            </div>
-          </div>
+          <ProfileInfo profile={profile} />
         </div>
       </motion.div>
 
-      <Sheet open={showDetail} onOpenChange={setShowDetail}>
-        <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center justify-between">
-              <span>{profile.name}, {profile.age}</span>
-              <button onClick={() => setShowDetail(false)} className="p-2">
-                <ChevronDown className="w-6 h-6" />
-              </button>
-            </SheetTitle>
-          </SheetHeader>
-          
-          <div className="space-y-6 mt-6">
-            {/* Looking For Section */}
-            <Card className="p-4">
-              <h3 className="font-semibold mb-2">Looking For</h3>
-              <p>{profile.lookingFor}</p>
-            </Card>
-
-            {/* About Me Section */}
-            <Card className="p-4">
-              <h3 className="font-semibold mb-2">About Me</h3>
-              <p>{profile.bio}</p>
-            </Card>
-
-            {/* Essentials Section */}
-            <Card className="p-4">
-              <h3 className="font-semibold mb-4">Essentials</h3>
-              <div className="space-y-3">
-                {profile.isVerified && (
-                  <div className="flex items-center gap-2">
-                    <Camera className="w-5 h-5 text-blue-500" />
-                    <span>Photo Verified</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <Home className="w-5 h-5" />
-                  <span>{profile.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  <span>{profile.distance}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Ruler className="w-5 h-5" />
-                  <span>{profile.height}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building className="w-5 h-5" />
-                  <span>{profile.occupation}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5" />
-                  <span>{profile.education}</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Tags Section */}
-            {profile.tags && profile.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {profile.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      {!isMatch && (
+        <ProfileDetail
+          profile={profile}
+          open={showDetail}
+          onOpenChange={setShowDetail}
+        />
+      )}
     </>
   );
 };

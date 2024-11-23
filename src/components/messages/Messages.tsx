@@ -4,11 +4,13 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Star, CheckCircle, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { useToast } from "@/components/ui/use-toast";
 
 type Profile = Tables<"profiles">;
 
 export const Messages = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -19,6 +21,11 @@ export const Messages = () => {
 
       if (error) {
         console.error("Error fetching profiles:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profiles. Please try again.",
+        });
         return;
       }
 
@@ -28,7 +35,60 @@ export const Messages = () => {
     };
 
     fetchProfiles();
-  }, []);
+  }, [toast]);
+
+  const handleCreateChat = async (profile: Profile) => {
+    // For demo purposes, we'll use a hardcoded profile_id_1
+    // In a real app, this would be the current user's profile ID
+    const myProfileId = profiles[0]?.id;
+    
+    if (!myProfileId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not create chat. Please try again.",
+      });
+      return;
+    }
+
+    // Check if chat already exists
+    const { data: existingChat } = await supabase
+      .from("chats")
+      .select("*")
+      .or(`profile_id_1.eq.${myProfileId},profile_id_2.eq.${myProfileId}`)
+      .or(`profile_id_1.eq.${profile.id},profile_id_2.eq.${profile.id}`)
+      .maybeSingle();
+
+    if (existingChat) {
+      toast({
+        title: "Chat exists",
+        description: "You already have a chat with this person.",
+      });
+      return;
+    }
+
+    // Create new chat
+    const { error: chatError } = await supabase
+      .from("chats")
+      .insert({
+        profile_id_1: myProfileId,
+        profile_id_2: profile.id,
+      });
+
+    if (chatError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create chat. Please try again.",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Chat created successfully!",
+    });
+  };
 
   // Split profiles into new and existing
   const newMatches = profiles.slice(0, 1); // First match is considered new
@@ -56,7 +116,10 @@ export const Messages = () => {
             </div>
             {newMatches.map((profile) => (
               <div key={profile.id} className="text-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden">
+                <div 
+                  className="w-20 h-20 rounded-full overflow-hidden cursor-pointer"
+                  onClick={() => handleCreateChat(profile)}
+                >
                   <img
                     src={profile.photos?.[0] || "/placeholder.svg"}
                     alt={profile.name}
@@ -74,7 +137,11 @@ export const Messages = () => {
           <h2 className="text-2xl font-semibold text-pink-500 mb-4">Messages</h2>
           <div className="space-y-4">
             {existingMatches.map((profile) => (
-              <Card key={profile.id} className="p-4 flex items-center gap-4 hover:bg-accent cursor-pointer">
+              <Card 
+                key={profile.id} 
+                className="p-4 flex items-center gap-4 hover:bg-accent cursor-pointer"
+                onClick={() => handleCreateChat(profile)}
+              >
                 <div className="relative">
                   <img
                     src={profile.photos?.[0] || "/placeholder.svg"}

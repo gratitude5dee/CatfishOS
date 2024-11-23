@@ -20,7 +20,7 @@ export const BottomNav = () => {
             key={path}
             to={path}
             className={`flex flex-col items-center p-2 ${
-              location.pathname === path ? "text-primary" : "text-secondary"
+              location.pathname === path ? "text-pink-500" : "text-gray-500"
             }`}
           >
             <Icon className="w-6 h-6" />

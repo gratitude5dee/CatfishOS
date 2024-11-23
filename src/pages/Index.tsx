@@ -134,7 +134,7 @@ const Index = () => {
       <main className="pt-16 pb-20 px-4">
         <div className="max-w-md mx-auto h-[calc(100vh-9rem)]">
           {window.location.pathname === "/messages" ? (
-            <Messages matches={matches} />
+            <Messages />
           ) : (
             <div className="relative w-full h-full">
               {currentProfileIndex < mockProfiles.length ? (

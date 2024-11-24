@@ -5,36 +5,64 @@ import { SwipeCard } from "@/components/SwipeCard";
 import { Messages } from "@/components/messages/Messages";
 import { useToast } from "@/components/ui/use-toast";
 import { Undo, X, Star, Heart, Zap } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
-import { Loader2 } from "lucide-react";
 
-type Profile = Tables<"profiles">;
+const mockProfiles = [
+  {
+    name: "Alyssa",
+    age: 23,
+    location: "Tempe",
+    distance: "8 miles away",
+    bio: "Looking for my person! My faith (Christian) is important to me and should be for my partner as well! Hoping to grow together and go on countless adventures!! 👩‍❤️‍👨",
+    occupation: "Software Engineer",
+    education: "ASU",
+    height: "5'5\"",
+    photos: ["https://images.unsplash.com/photo-1649972904349-6e44c42644a7"],
+    isVerified: true,
+    lookingFor: "Long-term partner",
+    tags: ["Monogamy", "Christian"],
+    gender: "Woman"
+  },
+  {
+    name: "Sarah",
+    age: 25,
+    location: "Phoenix",
+    distance: "12 miles away",
+    bio: "Tech enthusiast and coffee lover. Always up for hiking adventures!",
+    occupation: "UX Designer",
+    education: "UCLA",
+    height: "5'6\"",
+    photos: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"],
+    isVerified: true,
+    lookingFor: "Long-term partner",
+    tags: ["Active", "Coffee lover"],
+    gender: "Woman"
+  },
+  {
+    name: "Emily",
+    age: 24,
+    location: "Scottsdale",
+    distance: "5 miles away",
+    bio: "Passionate about technology and innovation. Looking for someone to share adventures with!",
+    occupation: "Tech Lead",
+    education: "Stanford",
+    height: "5'4\"",
+    photos: ["https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d"],
+    isVerified: true,
+    lookingFor: "Serious relationship",
+    tags: ["Tech", "Adventure"],
+    gender: "Woman"
+  },
+  // ... Add 9 more profiles with similar structure but different details
+];
 
 const Index = () => {
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [matches, setMatches] = useState<Profile[]>([]);
+  const [matches, setMatches] = useState<typeof mockProfiles>([]);
   const { toast } = useToast();
 
-  const { data: profiles, isLoading, error } = useQuery({
-    queryKey: ['profiles'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
   const handleSwipe = (direction: "left" | "right" | "up") => {
-    if (!profiles) return;
-    
     let message = "";
-    const currentProfile = profiles[currentProfileIndex];
+    const currentProfile = mockProfiles[currentProfileIndex];
 
     switch (direction) {
       case "right":
@@ -61,11 +89,9 @@ const Index = () => {
   };
 
   const handleButtonClick = (action: "rewind" | "reject" | "superlike" | "like" | "boost") => {
-    if (!profiles) return;
-    
     let direction: "left" | "right" = "left";
     let message = "";
-    const currentProfile = profiles[currentProfileIndex];
+    const currentProfile = mockProfiles[currentProfileIndex];
 
     switch (action) {
       case "rewind":
@@ -101,83 +127,63 @@ const Index = () => {
     });
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500">Error loading profiles</p>
-          <p className="text-sm text-gray-500">{error.message}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNav />
       
-      <main className="relative pt-16 pb-20 h-[calc(100vh-8rem)]">
-        <div className="max-w-md mx-auto h-full px-4 relative">
+      <main className="pt-16 pb-20 px-4">
+        <div className="max-w-md mx-auto h-[calc(100vh-9rem)]">
           {window.location.pathname === "/messages" ? (
             <Messages />
           ) : (
             <div className="relative w-full h-full">
-              {isLoading ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : profiles && profiles.length > 0 && currentProfileIndex < profiles.length ? (
+              {currentProfileIndex < mockProfiles.length ? (
                 <SwipeCard 
-                  profile={profiles[currentProfileIndex]}
+                  profile={mockProfiles[currentProfileIndex]}
                   onSwipe={handleSwipe}
-                  isMatch={matches.some(m => m.id === profiles[currentProfileIndex].id)}
+                  isMatch={matches.some(m => m.name === mockProfiles[currentProfileIndex].name)}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
+                <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center">
                   <p className="text-gray-500">No more profiles to show</p>
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4 px-4">
-                <button
-                  onClick={() => handleButtonClick("rewind")}
-                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-                  disabled={isLoading || !profiles?.length}
-                >
-                  <Undo className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("reject")}
-                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
-                  disabled={isLoading || !profiles?.length}
-                >
-                  <X className="w-8 h-8" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("superlike")}
-                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
-                  disabled={isLoading || !profiles?.length}
-                >
-                  <Star className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("like")}
-                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
-                  disabled={isLoading || !profiles?.length}
-                >
-                  <Heart className="w-8 h-8" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("boost")}
-                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
-                  disabled={isLoading || !profiles?.length}
-                >
-                  <Zap className="w-6 h-6" />
-                </button>
-              </div>
             </div>
           )}
+
+          {/* Action Buttons */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+            <button
+              onClick={() => handleButtonClick("rewind")}
+              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <Undo className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => handleButtonClick("reject")}
+              className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <button
+              onClick={() => handleButtonClick("superlike")}
+              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
+            >
+              <Star className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => handleButtonClick("like")}
+              className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
+            >
+              <Heart className="w-8 h-8" />
+            </button>
+            <button
+              onClick={() => handleButtonClick("boost")}
+              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
+            >
+              <Zap className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </main>
 

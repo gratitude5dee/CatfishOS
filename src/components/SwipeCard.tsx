@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, PanInfo, useAnimation, AnimatePresence } from "framer-motion";
+import { motion, PanInfo, useAnimation } from "framer-motion";
 import { ProfileInfo } from "./profile/ProfileInfo";
 import { ProfileDetail } from "./profile/ProfileDetail";
 
@@ -53,6 +53,7 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
       overlayControls.start({ opacity: 0, scale: 0.5 });
     }
 
+    // Show detail view on upward swipe only if not matched
     if (yOffset < -50 && !isMatch) {
       setShowDetail(true);
     }
@@ -86,62 +87,53 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
   };
 
   return (
-    <div className="absolute inset-0">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={profile.name}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ 
-            opacity: 1, 
-            scale: 1,
-            ...controls
-          }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-          drag
-          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-          dragElastic={0.9}
-          onDragStart={handleDragStart}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          style={{ 
-            rotate: rotation,
-            touchAction: "none",
-          }}
-          className="absolute inset-0 touch-none select-none"
-        >
-          <div className="w-full h-full bg-white rounded-2xl overflow-hidden shadow-xl">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10" />
-            
-            <img 
-              src={profile.photos[0]} 
-              alt={profile.name}
-              className="w-full h-full object-cover"
-            />
+    <>
+      <motion.div
+        drag
+        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+        dragElastic={1}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        initial={{ rotate: 0 }}
+        style={{ 
+          rotate: rotation,
+          touchAction: "none"
+        }}
+        className="absolute w-full h-full"
+      >
+        <div className="w-full h-full bg-black rounded-2xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10" />
+          
+          <img 
+            src={profile.photos[0]} 
+            alt={profile.name}
+            className="w-full h-full object-cover"
+          />
 
-            <motion.div 
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
-              animate={overlayControls}
-              initial={{ opacity: 0, scale: 0.5 }}
-            >
-              <div className="relative">
-                {rotation < 0 && (
-                  <div className="text-6xl font-bold text-pink-500 rotate-[-20deg] stroke-black">
-                    NOPE
-                  </div>
-                )}
-                {rotation > 0 && (
-                  <div className="text-6xl font-bold text-green-500 rotate-[20deg] stroke-black">
-                    LIKE
-                  </div>
-                )}
-              </div>
-            </motion.div>
+          <motion.div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+            animate={overlayControls}
+            initial={{ opacity: 0, scale: 0.5 }}
+          >
+            <div className="relative">
+              {rotation < 0 && (
+                <div className="text-6xl font-bold text-pink-500 rotate-[-20deg] stroke-black">
+                  NOPE
+                </div>
+              )}
+              {rotation > 0 && (
+                <div className="text-6xl font-bold text-green-500 rotate-[20deg] stroke-black">
+                  LIKE
+                </div>
+              )}
+            </div>
+          </motion.div>
 
-            <ProfileInfo profile={profile} />
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          <ProfileInfo profile={profile} />
+        </div>
+      </motion.div>
 
       {!isMatch && (
         <ProfileDetail
@@ -150,6 +142,6 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
           onOpenChange={setShowDetail}
         />
       )}
-    </div>
+    </>
   );
 };

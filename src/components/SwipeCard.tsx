@@ -3,6 +3,7 @@ import { motion, PanInfo, useAnimation } from "framer-motion";
 import { ProfileInfo } from "./profile/ProfileInfo";
 import { ProfileDetail } from "./profile/ProfileDetail";
 import { ActionButtons } from "./profile/ActionButtons";
+import { ChevronDown } from "lucide-react";
 
 interface Profile {
   name: string;
@@ -38,6 +39,7 @@ export const SwipeCard = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
+  const [showUpIndicator, setShowUpIndicator] = useState(false);
   const controls = useAnimation();
   const overlayControls = useAnimation();
 
@@ -53,6 +55,9 @@ export const SwipeCard = ({
     const newRotation = (xOffset / window.innerWidth) * 20;
     setRotation(newRotation);
 
+    // Show up indicator when dragging up
+    setShowUpIndicator(yOffset < -50);
+
     if (Math.abs(xOffset) > 50) {
       overlayControls.start({
         opacity: Math.min(Math.abs(xOffset) / 100, 1),
@@ -61,16 +66,14 @@ export const SwipeCard = ({
     } else {
       overlayControls.start({ opacity: 0, scale: 0.5 });
     }
-
-    if (yOffset < -50 && !isMatch) {
-      setShowDetail(true);
-    }
   };
 
   const handleDragEnd = async (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const xOffset = info.offset.x;
     const yOffset = info.offset.y;
     const velocity = info.velocity;
+
+    setShowUpIndicator(false);
 
     if (Math.abs(xOffset) > 100 || Math.abs(velocity.x) > 500) {
       const direction = xOffset > 0 ? "right" : "left";
@@ -119,6 +122,20 @@ export const SwipeCard = ({
             alt={profile.name}
             className="w-full h-full object-cover"
           />
+
+          {/* Swipe Up Indicator */}
+          <motion.div 
+            className="absolute inset-x-0 top-1/2 flex flex-col items-center justify-center pointer-events-none z-20"
+            animate={{ 
+              opacity: showUpIndicator ? 1 : 0,
+              y: showUpIndicator ? -20 : 0
+            }}
+            initial={{ opacity: 0, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown className="w-12 h-12 text-white transform rotate-180" />
+            <p className="text-white text-lg font-medium mt-2">View Profile</p>
+          </motion.div>
 
           <motion.div 
             className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"

@@ -16,8 +16,9 @@ export const MessagePreview = ({ profile, lastMessage, onClick }: MessagePreview
   return (
     <Card 
       className={cn(
-        "p-4 flex items-center gap-4 hover:bg-accent cursor-pointer transition-colors",
-        "animate-fade-in"
+        "p-4 flex items-center gap-4 cursor-pointer",
+        "hover:bg-accent transition-all duration-200",
+        "animate-fade-in hover:scale-[1.02]"
       )}
       onClick={onClick}
     >
@@ -25,10 +26,10 @@ export const MessagePreview = ({ profile, lastMessage, onClick }: MessagePreview
         <img
           src={profile.photos?.[0] || "/placeholder.svg"}
           alt={profile.name}
-          className="w-14 h-14 rounded-full object-cover"
+          className="w-14 h-14 rounded-full object-cover animate-scale-in"
         />
         {profile.is_verified && (
-          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5">
+          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 animate-fade-in">
             <CheckCircle className="w-4 h-4 text-blue-500" />
           </div>
         )}

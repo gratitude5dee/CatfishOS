@@ -24,7 +24,7 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="shrink-0 hover:bg-gray-100 transition-colors"
+          className="shrink-0 hover:bg-gray-100 transition-colors duration-200"
           aria-label="Send GIF"
         >
           GIF
@@ -33,15 +33,15 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 bg-gray-100 border-0 focus-visible:ring-2 focus-visible:ring-primary"
+          className="flex-1 bg-gray-100 border-0 focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
           onKeyPress={(e) => e.key === "Enter" && handleSend()}
         />
         <Button 
           onClick={handleSend} 
           size="icon"
           className={cn(
-            "shrink-0 transition-all",
-            message.trim() ? "opacity-100" : "opacity-50"
+            "shrink-0 transition-all duration-200",
+            message.trim() ? "opacity-100 scale-100" : "opacity-50 scale-95"
           )}
           disabled={!message.trim()}
           aria-label="Send message"

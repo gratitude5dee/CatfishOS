@@ -86,7 +86,7 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
   };
 
   return (
-    <>
+    <div className="absolute inset-0 w-full h-full">
       <AnimatePresence mode="wait">
         <motion.div
           key={profile.name}
@@ -102,11 +102,13 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
           onDragEnd={handleDragEnd}
           style={{ 
             rotate: rotation,
-            touchAction: "none"
+            touchAction: "none",
+            width: "100%",
+            height: "100%"
           }}
-          className="absolute w-full h-full"
+          className="relative"
         >
-          <div className="w-full h-full bg-black rounded-2xl overflow-hidden relative">
+          <div className="w-full h-full bg-white rounded-2xl overflow-hidden shadow-xl">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10" />
             
             <img 
@@ -146,6 +148,6 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
           onOpenChange={setShowDetail}
         />
       )}
-    </>
+    </div>
   );
 };

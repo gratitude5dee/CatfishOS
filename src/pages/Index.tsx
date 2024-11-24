@@ -2,72 +2,32 @@ import { useState } from "react";
 import { TopNav } from "@/components/TopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { SwipeCard } from "@/components/SwipeCard";
-import { Messages } from "@/components/messages/Messages";
 import { useToast } from "@/components/ui/use-toast";
-import { Undo, X, Star, Heart, Zap } from "lucide-react";
-
-const mockProfiles = [
-  {
-    name: "Alyssa",
-    age: 23,
-    location: "Tempe",
-    distance: "8 miles away",
-    bio: "Looking for my person! My faith (Christian) is important to me and should be for my partner as well! Hoping to grow together and go on countless adventures!! 👩‍❤️‍👨",
-    occupation: "Software Engineer",
-    education: "ASU",
-    height: "5'5\"",
-    photos: ["https://images.unsplash.com/photo-1649972904349-6e44c42644a7"],
-    isVerified: true,
-    lookingFor: "Long-term partner",
-    tags: ["Monogamy", "Christian"],
-    gender: "Woman"
-  },
-  {
-    name: "Sarah",
-    age: 25,
-    location: "Phoenix",
-    distance: "12 miles away",
-    bio: "Tech enthusiast and coffee lover. Always up for hiking adventures!",
-    occupation: "UX Designer",
-    education: "UCLA",
-    height: "5'6\"",
-    photos: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"],
-    isVerified: true,
-    lookingFor: "Long-term partner",
-    tags: ["Active", "Coffee lover"],
-    gender: "Woman"
-  },
-  {
-    name: "Emily",
-    age: 24,
-    location: "Scottsdale",
-    distance: "5 miles away",
-    bio: "Passionate about technology and innovation. Looking for someone to share adventures with!",
-    occupation: "Tech Lead",
-    education: "Stanford",
-    height: "5'4\"",
-    photos: ["https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d"],
-    isVerified: true,
-    lookingFor: "Serious relationship",
-    tags: ["Tech", "Adventure"],
-    gender: "Woman"
-  }
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const [profiles, setProfiles] = useState(mockProfiles);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [matches, setMatches] = useState<typeof mockProfiles>([]);
   const { toast } = useToast();
+
+  const { data: profiles, isLoading, error } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleSwipe = (direction: "left" | "right" | "up") => {
     let message = "";
-    const currentProfile = profiles[currentProfileIndex];
 
     switch (direction) {
       case "right":
         message = "It's a match! You can now message each other!";
-        setMatches(prev => [...prev, currentProfile]);
         break;
       case "left":
         message = "Passed. Maybe next time!";
@@ -88,10 +48,8 @@ const Index = () => {
     }
   };
 
-  const handleButtonClick = (action: "rewind" | "reject" | "superlike" | "like" | "boost") => {
-    let direction: "left" | "right" = "left";
+  const handleAction = (action: "rewind" | "reject" | "superlike" | "like" | "boost") => {
     let message = "";
-    const currentProfile = profiles[currentProfileIndex];
 
     switch (action) {
       case "rewind":
@@ -103,20 +61,15 @@ const Index = () => {
         }
         break;
       case "reject":
-        direction = "left";
         message = "Passed. Maybe next time!";
         setCurrentProfileIndex(prev => prev + 1);
         break;
       case "superlike":
-        direction = "right";
         message = "Super Liked! They'll definitely see this!";
-        setMatches(prev => [...prev, currentProfile]);
         setCurrentProfileIndex(prev => prev + 1);
         break;
       case "like":
-        direction = "right";
         message = "It's a match! You can now message each other!";
-        setMatches(prev => [...prev, currentProfile]);
         setCurrentProfileIndex(prev => prev + 1);
         break;
       case "boost":
@@ -131,65 +84,43 @@ const Index = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse text-xl text-gray-500">Loading profiles...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-red-500">Error loading profiles</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNav />
       
       <main className="pt-16 pb-20 px-4">
         <div className="max-w-md mx-auto h-[calc(100vh-9rem)]">
-          {window.location.pathname === "/messages" ? (
-            <Messages />
-          ) : (
-            <div className="relative w-full h-full">
-              {currentProfileIndex < profiles.length ? (
-                <SwipeCard 
-                  key={currentProfileIndex} // Add key to force re-render on profile change
-                  profile={profiles[currentProfileIndex]}
-                  onSwipe={handleSwipe}
-                  isMatch={matches.some(m => m.name === profiles[currentProfileIndex].name)}
-                />
-              ) : (
-                <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                  <p className="text-gray-500">No more profiles to show</p>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
-                <button
-                  onClick={() => handleButtonClick("rewind")}
-                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-                  disabled={currentProfileIndex === 0}
-                >
-                  <Undo className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("reject")}
-                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
-                >
-                  <X className="w-8 h-8" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("superlike")}
-                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
-                >
-                  <Star className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("like")}
-                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
-                >
-                  <Heart className="w-8 h-8" />
-                </button>
-                <button
-                  onClick={() => handleButtonClick("boost")}
-                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
-                >
-                  <Zap className="w-6 h-6" />
-                </button>
+          <div className="relative w-full h-full">
+            {profiles && currentProfileIndex < profiles.length ? (
+              <SwipeCard 
+                key={currentProfileIndex}
+                profile={profiles[currentProfileIndex]}
+                onSwipe={handleSwipe}
+                onAction={handleAction}
+                canRewind={currentProfileIndex > 0}
+              />
+            ) : (
+              <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <p className="text-gray-500">No more profiles to show</p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
 

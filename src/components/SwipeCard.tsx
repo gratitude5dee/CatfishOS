@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, PanInfo, useAnimation } from "framer-motion";
 import { ProfileInfo } from "./profile/ProfileInfo";
 import { ProfileDetail } from "./profile/ProfileDetail";
+import { ActionButtons } from "./profile/ActionButtons";
 
 interface Profile {
   name: string;
@@ -22,10 +23,18 @@ interface Profile {
 interface SwipeCardProps {
   profile: Profile;
   onSwipe: (direction: "left" | "right" | "up") => void;
+  onAction: (action: "rewind" | "reject" | "superlike" | "like" | "boost") => void;
+  canRewind: boolean;
   isMatch?: boolean;
 }
 
-export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps) => {
+export const SwipeCard = ({ 
+  profile, 
+  onSwipe, 
+  onAction,
+  canRewind,
+  isMatch = false 
+}: SwipeCardProps) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -53,7 +62,6 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
       overlayControls.start({ opacity: 0, scale: 0.5 });
     }
 
-    // Show detail view on upward swipe only if not matched
     if (yOffset < -50 && !isMatch) {
       setShowDetail(true);
     }
@@ -103,8 +111,8 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
         }}
         className="absolute w-full h-full"
       >
-        <div className="w-full h-full bg-black rounded-2xl overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10" />
+        <div className="w-full h-full bg-black rounded-3xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black z-10" />
           
           <img 
             src={profile.photos[0]} 
@@ -119,12 +127,12 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
           >
             <div className="relative">
               {rotation < 0 && (
-                <div className="text-6xl font-bold text-pink-500 rotate-[-20deg] stroke-black">
+                <div className="text-7xl font-bold text-pink-500 rotate-[-20deg] drop-shadow-lg">
                   NOPE
                 </div>
               )}
               {rotation > 0 && (
-                <div className="text-6xl font-bold text-green-500 rotate-[20deg] stroke-black">
+                <div className="text-7xl font-bold text-green-500 rotate-[20deg] drop-shadow-lg">
                   LIKE
                 </div>
               )}
@@ -132,6 +140,8 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
           </motion.div>
 
           <ProfileInfo profile={profile} />
+          
+          <ActionButtons onAction={onAction} canRewind={canRewind} />
         </div>
       </motion.div>
 

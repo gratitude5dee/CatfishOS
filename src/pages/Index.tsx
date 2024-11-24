@@ -103,8 +103,8 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <TopNav />
       
-      <main className="pt-16 pb-20 px-4">
-        <div className="max-w-md mx-auto h-[calc(100vh-9rem)]">
+      <main className="relative pt-16 pb-20">
+        <div className="max-w-md mx-auto h-[calc(100vh-9rem)] px-4">
           {window.location.pathname === "/messages" ? (
             <Messages />
           ) : (
@@ -120,42 +120,42 @@ const Index = () => {
                   <p className="text-gray-500">No more profiles to show</p>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4 px-4">
+                <button
+                  onClick={() => handleButtonClick("rewind")}
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <Undo className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("reject")}
+                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
+                >
+                  <X className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("superlike")}
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
+                >
+                  <Star className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("like")}
+                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
+                >
+                  <Heart className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("boost")}
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
+                >
+                  <Zap className="w-6 h-6" />
+                </button>
+              </div>
             </div>
           )}
-
-          {/* Action Buttons */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
-            <button
-              onClick={() => handleButtonClick("rewind")}
-              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <Undo className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("reject")}
-              className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("superlike")}
-              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
-            >
-              <Star className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("like")}
-              className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
-            >
-              <Heart className="w-8 h-8" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("boost")}
-              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
-            >
-              <Zap className="w-6 h-6" />
-            </button>
-          </div>
         </div>
       </main>
 

@@ -86,27 +86,29 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
   };
 
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={profile.name}
-          initial={{ opacity: 0 }}
-          animate={controls}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1,
+            ...controls
+          }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
           drag
           dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-          dragElastic={1}
+          dragElastic={0.9}
           onDragStart={handleDragStart}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           style={{ 
             rotate: rotation,
             touchAction: "none",
-            width: "100%",
-            height: "100%"
           }}
-          className="relative"
+          className="absolute inset-0 touch-none select-none"
         >
           <div className="w-full h-full bg-white rounded-2xl overflow-hidden shadow-xl">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10" />

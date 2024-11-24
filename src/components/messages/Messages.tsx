@@ -16,105 +16,117 @@ export const Messages = () => {
 
   useEffect(() => {
     const fetchProfilesAndMessages = async () => {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
-        .limit(10);
+      try {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("*")
+          .limit(10);
 
-      if (profilesError) {
-        console.error("Error fetching profiles:", profilesError);
+        if (profilesError) throw profilesError;
+
+        if (profilesData) {
+          setProfiles(profilesData);
+          
+          const { data: messagesData, error: messagesError } = await supabase
+            .from("messages")
+            .select("*")
+            .order('created_at', { ascending: false });
+
+          if (messagesError) throw messagesError;
+
+          if (messagesData) {
+            const latestMessages: Record<string, Message> = {};
+            messagesData.forEach((message) => {
+              if (!latestMessages[message.sender_id!]) {
+                latestMessages[message.sender_id!] = message;
+              }
+            });
+            setMessages(latestMessages);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load profiles. Please try again.",
+          description: "Failed to load messages. Please try again.",
         });
-        return;
-      }
-
-      if (profilesData) {
-        setProfiles(profilesData);
-
-        const { data: messagesData, error: messagesError } = await supabase
-          .from("messages")
-          .select("*")
-          .order('created_at', { ascending: false });
-
-        if (messagesError) {
-          console.error("Error fetching messages:", messagesError);
-          return;
-        }
-
-        if (messagesData) {
-          const latestMessages: Record<string, Message> = {};
-          messagesData.forEach((message) => {
-            if (!latestMessages[message.sender_id!]) {
-              latestMessages[message.sender_id!] = message;
-            }
-          });
-          setMessages(latestMessages);
-        }
       }
     };
 
     fetchProfilesAndMessages();
+
+    // Subscribe to real-time updates
+    const messagesSubscription = supabase
+      .channel('messages_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages'
+        },
+        async (payload) => {
+          if (payload.new) {
+            const message = payload.new as Message;
+            setMessages(prev => ({
+              ...prev,
+              [message.sender_id!]: message
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      messagesSubscription.unsubscribe();
+    };
   }, [toast]);
 
   const handleCreateChat = async (profile: Profile) => {
-    const myProfileId = profiles[0]?.id;
-    
-    if (!myProfileId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not create chat. Please try again.",
-      });
-      return;
-    }
+    try {
+      const myProfileId = profiles[0]?.id;
+      
+      if (!myProfileId) {
+        throw new Error("User profile not found");
+      }
 
-    // Check for existing chat in both directions
-    const { data: existingChat, error: existingChatError } = await supabase
-      .from("chats")
-      .select("*")
-      .or(`and(profile_id_1.eq.${myProfileId},profile_id_2.eq.${profile.id}),and(profile_id_1.eq.${profile.id},profile_id_2.eq.${myProfileId})`)
-      .maybeSingle();
+      // Query using the LEAST/GREATEST pattern to match the unique constraint
+      const { data: existingChat, error: existingChatError } = await supabase
+        .from("chats")
+        .select("*")
+        .or(`and(profile_id_1.eq.${myProfileId},profile_id_2.eq.${profile.id}),and(profile_id_1.eq.${profile.id},profile_id_2.eq.${myProfileId})`)
+        .maybeSingle();
 
-    if (existingChatError) {
-      console.error("Error checking existing chat:", existingChatError);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to check existing chat. Please try again.",
-      });
-      return;
-    }
+      if (existingChatError) throw existingChatError;
 
-    if (existingChat) {
-      setSelectedChat({ chatId: existingChat.id, profile });
-      return;
-    }
+      if (existingChat) {
+        setSelectedChat({ chatId: existingChat.id, profile });
+        return;
+      }
 
-    // Create new chat only if one doesn't exist
-    const { data: newChat, error: chatError } = await supabase
-      .from("chats")
-      .insert({
-        profile_id_1: myProfileId,
-        profile_id_2: profile.id,
-      })
-      .select()
-      .single();
+      // Create new chat with ordered profile IDs to match the unique constraint
+      const { data: newChat, error: chatError } = await supabase
+        .from("chats")
+        .insert({
+          profile_id_1: myProfileId < profile.id ? myProfileId : profile.id,
+          profile_id_2: myProfileId < profile.id ? profile.id : myProfileId,
+        })
+        .select()
+        .single();
 
-    if (chatError) {
-      console.error("Error creating chat:", chatError);
+      if (chatError) throw chatError;
+
+      if (newChat) {
+        setSelectedChat({ chatId: newChat.id, profile });
+      }
+    } catch (error) {
+      console.error("Error creating chat:", error);
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to create chat. Please try again.",
       });
-      return;
-    }
-
-    if (newChat) {
-      setSelectedChat({ chatId: newChat.id, profile });
     }
   };
 

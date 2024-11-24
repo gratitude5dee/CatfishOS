@@ -91,7 +91,7 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
         <motion.div
           key={profile.name}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={controls}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           drag
@@ -100,7 +100,6 @@ export const SwipeCard = ({ profile, onSwipe, isMatch = false }: SwipeCardProps)
           onDragStart={handleDragStart}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
-          animate={controls}
           style={{ 
             rotate: rotation,
             touchAction: "none"

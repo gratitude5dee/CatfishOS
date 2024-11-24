@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card } from "../ui/card";
-import { ScrollArea } from "../ui/scroll-area";
-import { Star, CheckCircle, Heart } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { useToast } from "@/components/ui/use-toast";
+import { MessagesList } from "./MessagesList";
 
 type Profile = Tables<"profiles">;
 type Message = Tables<"messages">;
@@ -38,13 +36,7 @@ export const Messages = () => {
         // Fetch latest message for each profile
         const { data: messagesData, error: messagesError } = await supabase
           .from("messages")
-          .select(`
-            id,
-            content,
-            chat_id,
-            sender_id,
-            created_at
-          `)
+          .select("*")
           .order('created_at', { ascending: false });
 
         if (messagesError) {
@@ -119,89 +111,5 @@ export const Messages = () => {
     });
   };
 
-  // Split profiles into new and existing matches
-  const newMatches = profiles.slice(0, 3); // First 3 matches are considered new
-  const existingMatches = profiles.slice(3); // Rest are existing matches
-
-  return (
-    <ScrollArea className="h-[calc(100vh-8rem)]">
-      <div className="space-y-6 p-4">
-        {/* New Matches Section */}
-        <div>
-          <h2 className="text-2xl font-semibold text-pink-500 mb-4">New matches</h2>
-          <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
-            <div className="text-center flex-shrink-0">
-              <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-pink-400 to-pink-600 flex items-center justify-center text-white text-xl font-bold">
-                  {profiles.length}
-                </div>
-                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1">
-                  <div className="bg-pink-500 rounded-full p-1">
-                    <Heart className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              </div>
-              <p className="mt-2 text-sm text-gray-600">Likes</p>
-            </div>
-            {newMatches.map((profile) => (
-              <div key={profile.id} className="text-center flex-shrink-0">
-                <div 
-                  className="relative w-20 h-20 rounded-full overflow-hidden cursor-pointer"
-                  onClick={() => handleCreateChat(profile)}
-                >
-                  <img
-                    src={profile.photos?.[0] || "/placeholder.svg"}
-                    alt={profile.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {profile.is_verified && (
-                    <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-1">
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                </div>
-                <p className="mt-2 text-sm text-gray-600">{profile.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Messages Section */}
-        <div>
-          <h2 className="text-2xl font-semibold text-pink-500 mb-4">Messages</h2>
-          <div className="space-y-4">
-            {existingMatches.map((profile) => (
-              <Card 
-                key={profile.id} 
-                className="p-4 flex items-center gap-4 hover:bg-accent cursor-pointer"
-                onClick={() => handleCreateChat(profile)}
-              >
-                <div className="relative">
-                  <img
-                    src={profile.photos?.[0] || "/placeholder.svg"}
-                    alt={profile.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  {profile.is_verified && (
-                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5">
-                      <CheckCircle className="w-4 h-4 text-blue-500" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{profile.name}</h3>
-                    <span className="text-sm text-muted-foreground">• {profile.distance}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {messages[profile.id]?.content || "No messages yet"}
-                  </p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    </ScrollArea>
-  );
+  return <MessagesList profiles={profiles} messages={messages} onChatCreate={handleCreateChat} />;
 };

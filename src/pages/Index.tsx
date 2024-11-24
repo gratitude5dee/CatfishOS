@@ -51,18 +51,18 @@ const mockProfiles = [
     lookingFor: "Serious relationship",
     tags: ["Tech", "Adventure"],
     gender: "Woman"
-  },
-  // ... Add 9 more profiles with similar structure but different details
+  }
 ];
 
 const Index = () => {
+  const [profiles, setProfiles] = useState(mockProfiles);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [matches, setMatches] = useState<typeof mockProfiles>([]);
   const { toast } = useToast();
 
   const handleSwipe = (direction: "left" | "right" | "up") => {
     let message = "";
-    const currentProfile = mockProfiles[currentProfileIndex];
+    const currentProfile = profiles[currentProfileIndex];
 
     switch (direction) {
       case "right":
@@ -91,12 +91,16 @@ const Index = () => {
   const handleButtonClick = (action: "rewind" | "reject" | "superlike" | "like" | "boost") => {
     let direction: "left" | "right" = "left";
     let message = "";
-    const currentProfile = mockProfiles[currentProfileIndex];
+    const currentProfile = profiles[currentProfileIndex];
 
     switch (action) {
       case "rewind":
-        setCurrentProfileIndex(prev => Math.max(0, prev - 1));
-        message = "Rewinding to previous profile";
+        if (currentProfileIndex > 0) {
+          setCurrentProfileIndex(prev => prev - 1);
+          message = "Rewinding to previous profile";
+        } else {
+          message = "No more profiles to rewind to";
+        }
         break;
       case "reject":
         direction = "left";
@@ -137,53 +141,55 @@ const Index = () => {
             <Messages />
           ) : (
             <div className="relative w-full h-full">
-              {currentProfileIndex < mockProfiles.length ? (
+              {currentProfileIndex < profiles.length ? (
                 <SwipeCard 
-                  profile={mockProfiles[currentProfileIndex]}
+                  key={currentProfileIndex} // Add key to force re-render on profile change
+                  profile={profiles[currentProfileIndex]}
                   onSwipe={handleSwipe}
-                  isMatch={matches.some(m => m.name === mockProfiles[currentProfileIndex].name)}
+                  isMatch={matches.some(m => m.name === profiles[currentProfileIndex].name)}
                 />
               ) : (
                 <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center">
                   <p className="text-gray-500">No more profiles to show</p>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+                <button
+                  onClick={() => handleButtonClick("rewind")}
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={currentProfileIndex === 0}
+                >
+                  <Undo className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("reject")}
+                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
+                >
+                  <X className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("superlike")}
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
+                >
+                  <Star className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("like")}
+                  className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
+                >
+                  <Heart className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={() => handleButtonClick("boost")}
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
+                >
+                  <Zap className="w-6 h-6" />
+                </button>
+              </div>
             </div>
           )}
-
-          {/* Action Buttons */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
-            <button
-              onClick={() => handleButtonClick("rewind")}
-              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <Undo className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("reject")}
-              className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("superlike")}
-              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors"
-            >
-              <Star className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("like")}
-              className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-green-500 hover:text-green-600 transition-colors"
-            >
-              <Heart className="w-8 h-8" />
-            </button>
-            <button
-              onClick={() => handleButtonClick("boost")}
-              className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-purple-500 hover:text-purple-600 transition-colors"
-            >
-              <Zap className="w-6 h-6" />
-            </button>
-          </div>
         </div>
       </main>
 

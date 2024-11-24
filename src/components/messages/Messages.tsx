@@ -3,6 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { MessagesList } from "./MessagesList";
+import { Chat } from "./Chat";
 
 type Profile = Tables<"profiles">;
 type Message = Tables<"messages">;
@@ -10,11 +11,11 @@ type Message = Tables<"messages">;
 export const Messages = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [messages, setMessages] = useState<Record<string, Message>>({});
+  const [selectedChat, setSelectedChat] = useState<{ chatId: string; profile: Profile } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfilesAndMessages = async () => {
-      // Fetch profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -33,7 +34,6 @@ export const Messages = () => {
       if (profilesData) {
         setProfiles(profilesData);
 
-        // Fetch latest message for each profile
         const { data: messagesData, error: messagesError } = await supabase
           .from("messages")
           .select("*")
@@ -60,7 +60,6 @@ export const Messages = () => {
   }, [toast]);
 
   const handleCreateChat = async (profile: Profile) => {
-    // For demo purposes, we'll use the first profile as the current user
     const myProfileId = profiles[0]?.id;
     
     if (!myProfileId) {
@@ -72,7 +71,6 @@ export const Messages = () => {
       return;
     }
 
-    // Check if chat already exists
     const { data: existingChat } = await supabase
       .from("chats")
       .select("*")
@@ -81,22 +79,20 @@ export const Messages = () => {
       .maybeSingle();
 
     if (existingChat) {
-      toast({
-        title: "Chat exists",
-        description: "You already have a chat with this person.",
-      });
+      setSelectedChat({ chatId: existingChat.id, profile });
       return;
     }
 
-    // Create new chat
-    const { error: chatError } = await supabase
+    const { data: newChat, error: chatError } = await supabase
       .from("chats")
       .insert({
         profile_id_1: myProfileId,
         profile_id_2: profile.id,
-      });
+      })
+      .select()
+      .single();
 
-    if (chatError) {
+    if (chatError || !newChat) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -105,11 +101,18 @@ export const Messages = () => {
       return;
     }
 
-    toast({
-      title: "Success",
-      description: "Chat created successfully!",
-    });
+    setSelectedChat({ chatId: newChat.id, profile });
   };
+
+  if (selectedChat) {
+    return (
+      <Chat
+        chatId={selectedChat.chatId}
+        profile={selectedChat.profile}
+        onBack={() => setSelectedChat(null)}
+      />
+    );
+  }
 
   return <MessagesList profiles={profiles} messages={messages} onChatCreate={handleCreateChat} />;
 };

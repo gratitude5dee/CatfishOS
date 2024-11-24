@@ -28,19 +28,19 @@ export const ProfileDetail = ({ profile, open, onOpenChange }: ProfileDetailProp
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="bottom" 
-        className="h-[85vh] overflow-y-auto rounded-t-[20px] p-0"
+        className="h-[85vh] sm:h-[90vh] overflow-y-auto rounded-t-[20px] p-0"
       >
-        <div className="sticky top-0 z-10 bg-background pt-2 px-4 pb-4 border-b">
+        <div className="sticky top-0 z-10 bg-background pt-2 px-3 sm:px-4 pb-4 border-b">
           <div className="flex justify-center mb-2">
             <div className="w-12 h-1 bg-gray-300 rounded-full" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-xl sm:text-2xl font-bold">
                 {profile.name}, {profile.age}
               </h2>
               {profile.occupation && (
-                <p className="text-muted-foreground">{profile.occupation}</p>
+                <p className="text-muted-foreground text-sm sm:text-base">{profile.occupation}</p>
               )}
             </div>
             <button 
@@ -52,24 +52,21 @@ export const ProfileDetail = ({ profile, open, onOpenChange }: ProfileDetailProp
           </div>
         </div>
         
-        <div className="space-y-6 p-4">
-          {/* Looking For Section */}
+        <div className="space-y-4 sm:space-y-6 p-3 sm:p-4">
           {profile.lookingFor && (
-            <Card className="p-4 border-none shadow-none bg-gray-50">
-              <h3 className="font-semibold mb-2 text-lg">Looking For</h3>
-              <p className="text-gray-700">{profile.lookingFor}</p>
+            <Card className="p-3 sm:p-4 border-none shadow-none bg-gray-50">
+              <h3 className="font-semibold mb-2 text-base sm:text-lg">Looking For</h3>
+              <p className="text-gray-700 text-sm sm:text-base">{profile.lookingFor}</p>
             </Card>
           )}
 
-          {/* About Me Section */}
-          <Card className="p-4 border-none shadow-none bg-gray-50">
-            <h3 className="font-semibold mb-2 text-lg">About Me</h3>
-            <p className="text-gray-700">{profile.bio}</p>
+          <Card className="p-3 sm:p-4 border-none shadow-none bg-gray-50">
+            <h3 className="font-semibold mb-2 text-base sm:text-lg">About Me</h3>
+            <p className="text-gray-700 text-sm sm:text-base">{profile.bio}</p>
           </Card>
 
-          {/* Essentials Section */}
-          <Card className="p-4 border-none shadow-none bg-gray-50">
-            <h3 className="font-semibold mb-4 text-lg">Essentials</h3>
+          <Card className="p-3 sm:p-4 border-none shadow-none bg-gray-50">
+            <h3 className="font-semibold mb-4 text-base sm:text-lg">Essentials</h3>
             <div className="space-y-4">
               {profile.isVerified && (
                 <div className="flex items-center gap-3">
@@ -118,14 +115,13 @@ export const ProfileDetail = ({ profile, open, onOpenChange }: ProfileDetailProp
             </div>
           </Card>
 
-          {/* Tags Section */}
           {profile.tags && profile.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {profile.tags.map((tag) => (
                 <Badge 
                   key={tag} 
                   variant="secondary"
-                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  className="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm"
                 >
                   {tag}
                 </Badge>

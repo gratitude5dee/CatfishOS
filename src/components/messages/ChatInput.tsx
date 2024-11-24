@@ -19,12 +19,12 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
   };
 
   return (
-    <div className="p-4 border-t bg-white sticky bottom-0 z-10 animate-fade-up">
+    <div className="p-3 sm:p-4 border-t bg-white sticky bottom-0 z-10 animate-fade-up">
       <div className="flex gap-2 items-center max-w-3xl mx-auto">
         <Button 
           variant="ghost" 
           size="icon" 
-          className="shrink-0 hover:bg-gray-100 transition-colors duration-200"
+          className="shrink-0 hover:bg-gray-100 transition-colors duration-200 hidden sm:flex"
           aria-label="Send GIF"
         >
           GIF

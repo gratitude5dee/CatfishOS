@@ -120,7 +120,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <TopNav />
       
-      <main className="pt-16 pb-20 px-4">
+      <main className="pt-16 pb-20 px-4 sm:px-6">
         <div className="max-w-md mx-auto h-[calc(100vh-9rem)]">
           <div className="relative w-full h-full">
             {profiles && currentProfileIndex < profiles.length ? (
@@ -132,8 +132,8 @@ const Index = () => {
                 canRewind={currentProfileIndex > 0}
               />
             ) : (
-              <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                <p className="text-gray-500">No more profiles to show</p>
+              <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center p-6">
+                <p className="text-gray-500 text-center">No more profiles to show</p>
               </div>
             )}
           </div>

@@ -5,64 +5,36 @@ import { SwipeCard } from "@/components/SwipeCard";
 import { Messages } from "@/components/messages/Messages";
 import { useToast } from "@/components/ui/use-toast";
 import { Undo, X, Star, Heart, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
 
-const mockProfiles = [
-  {
-    name: "Alyssa",
-    age: 23,
-    location: "Tempe",
-    distance: "8 miles away",
-    bio: "Looking for my person! My faith (Christian) is important to me and should be for my partner as well! Hoping to grow together and go on countless adventures!! 👩‍❤️‍👨",
-    occupation: "Software Engineer",
-    education: "ASU",
-    height: "5'5\"",
-    photos: ["https://images.unsplash.com/photo-1649972904349-6e44c42644a7"],
-    isVerified: true,
-    lookingFor: "Long-term partner",
-    tags: ["Monogamy", "Christian"],
-    gender: "Woman"
-  },
-  {
-    name: "Sarah",
-    age: 25,
-    location: "Phoenix",
-    distance: "12 miles away",
-    bio: "Tech enthusiast and coffee lover. Always up for hiking adventures!",
-    occupation: "UX Designer",
-    education: "UCLA",
-    height: "5'6\"",
-    photos: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"],
-    isVerified: true,
-    lookingFor: "Long-term partner",
-    tags: ["Active", "Coffee lover"],
-    gender: "Woman"
-  },
-  {
-    name: "Emily",
-    age: 24,
-    location: "Scottsdale",
-    distance: "5 miles away",
-    bio: "Passionate about technology and innovation. Looking for someone to share adventures with!",
-    occupation: "Tech Lead",
-    education: "Stanford",
-    height: "5'4\"",
-    photos: ["https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d"],
-    isVerified: true,
-    lookingFor: "Serious relationship",
-    tags: ["Tech", "Adventure"],
-    gender: "Woman"
-  },
-  // ... Add 9 more profiles with similar structure but different details
-];
+type Profile = Tables<"profiles">;
 
 const Index = () => {
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [matches, setMatches] = useState<typeof mockProfiles>([]);
+  const [matches, setMatches] = useState<Profile[]>([]);
   const { toast } = useToast();
+
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+      
+      return data || [];
+    }
+  });
 
   const handleSwipe = (direction: "left" | "right" | "up") => {
     let message = "";
-    const currentProfile = mockProfiles[currentProfileIndex];
+    const currentProfile = profiles[currentProfileIndex];
 
     switch (direction) {
       case "right":
@@ -91,7 +63,7 @@ const Index = () => {
   const handleButtonClick = (action: "rewind" | "reject" | "superlike" | "like" | "boost") => {
     let direction: "left" | "right" = "left";
     let message = "";
-    const currentProfile = mockProfiles[currentProfileIndex];
+    const currentProfile = profiles[currentProfileIndex];
 
     switch (action) {
       case "rewind":
@@ -137,11 +109,11 @@ const Index = () => {
             <Messages />
           ) : (
             <div className="relative w-full h-full">
-              {currentProfileIndex < mockProfiles.length ? (
+              {currentProfileIndex < profiles.length ? (
                 <SwipeCard 
-                  profile={mockProfiles[currentProfileIndex]}
+                  profile={profiles[currentProfileIndex]}
                   onSwipe={handleSwipe}
-                  isMatch={matches.some(m => m.name === mockProfiles[currentProfileIndex].name)}
+                  isMatch={matches.some(m => m.id === profiles[currentProfileIndex].id)}
                 />
               ) : (
                 <div className="w-full h-full bg-white rounded-2xl shadow-lg flex items-center justify-center">

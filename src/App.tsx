@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Splash from "./pages/Splash";
 import Welcome from "./pages/Welcome";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/splash" element={<Splash />} />
           <Route path="/welcome" element={<Welcome />} />
+          <Route path="/messages" element={<Messages />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

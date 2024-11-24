@@ -22,12 +22,28 @@ const Index = () => {
     },
   });
 
-  const handleSwipe = (direction: "left" | "right" | "up") => {
+  const handleSwipe = async (direction: "left" | "right" | "up") => {
+    if (!profiles || currentProfileIndex >= profiles.length) return;
+
+    const currentProfile = profiles[currentProfileIndex];
     let message = "";
 
     switch (direction) {
       case "right":
-        message = "It's a match! You can now message each other!";
+        // Create a chat when there's a match
+        const { error: chatError } = await supabase
+          .from('chats')
+          .insert({
+            profile_id_1: profiles[0]?.id, // Current user's profile
+            profile_id_2: currentProfile.id, // Matched profile
+          });
+
+        if (chatError) {
+          console.error('Error creating chat:', chatError);
+          message = "Couldn't create chat. Please try again.";
+        } else {
+          message = "It's a match! You can now message each other!";
+        }
         break;
       case "left":
         message = "Passed. Maybe next time!";

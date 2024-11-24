@@ -71,18 +71,29 @@ export const Messages = () => {
       return;
     }
 
-    const { data: existingChat } = await supabase
+    // Check for existing chat in both directions
+    const { data: existingChat, error: existingChatError } = await supabase
       .from("chats")
       .select("*")
-      .or(`profile_id_1.eq.${myProfileId},profile_id_2.eq.${myProfileId}`)
-      .or(`profile_id_1.eq.${profile.id},profile_id_2.eq.${profile.id}`)
+      .or(`and(profile_id_1.eq.${myProfileId},profile_id_2.eq.${profile.id}),and(profile_id_1.eq.${profile.id},profile_id_2.eq.${myProfileId})`)
       .maybeSingle();
+
+    if (existingChatError) {
+      console.error("Error checking existing chat:", existingChatError);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to check existing chat. Please try again.",
+      });
+      return;
+    }
 
     if (existingChat) {
       setSelectedChat({ chatId: existingChat.id, profile });
       return;
     }
 
+    // Create new chat only if one doesn't exist
     const { data: newChat, error: chatError } = await supabase
       .from("chats")
       .insert({
@@ -92,7 +103,8 @@ export const Messages = () => {
       .select()
       .single();
 
-    if (chatError || !newChat) {
+    if (chatError) {
+      console.error("Error creating chat:", chatError);
       toast({
         variant: "destructive",
         title: "Error",
@@ -101,7 +113,9 @@ export const Messages = () => {
       return;
     }
 
-    setSelectedChat({ chatId: newChat.id, profile });
+    if (newChat) {
+      setSelectedChat({ chatId: newChat.id, profile });
+    }
   };
 
   if (selectedChat) {

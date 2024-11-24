@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Splash from "./pages/Splash";
 import Welcome from "./pages/Welcome";
 import Messages from "./pages/Messages";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/splash" element={<Splash />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
